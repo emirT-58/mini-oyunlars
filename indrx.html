@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Arcade Pro - Ultimate Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            background: radial-gradient(circle at center, #0f0c1b 0%, #050508 100%);
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background-image: linear-gradient(rgba(0, 255, 240, 0.03) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(0, 255, 240, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            z-index: -2;
+        }
+
+        .arcade-cabinet {
+            background: rgba(13, 15, 28, 0.96);
+            border: 4px solid #00fff0;
+            box-shadow: 0 0 60px rgba(0, 255, 240, 0.4), inset 0 0 30px rgba(233, 69, 96, 0.2);
+            border-radius: 28px;
+            padding: 24px;
+            width: 440px;
+            text-align: center;
+            position: relative;
+        }
+
+        .arcade-header h1 {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 14px;
+            color: #00fff0;
+            text-shadow: 0 0 10px #00fff0, 0 0 20px #00fff0;
+            margin-bottom: 12px;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            background: #080a14;
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 11px;
+            margin-bottom: 14px;
+            border: 1px solid #1f293d;
+        }
+
+        .stats-bar span {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            color: #8be9fd;
+            font-weight: 600;
+        }
+
+        .stats-bar strong { 
+            color: #ff79c6; 
+            font-size: 12px;
+        }
+
+        /* 7 Oyun İçin 3'lü Grid Menü Düzeni */
+        .game-select {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+
+        .game-select button {
+            background: #111629;
+            color: #a4b0be;
+            border: 1px solid #222b45;
+            padding: 8px 4px;
+            font-size: 10px;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .game-select button:hover { 
+            background: #1f293d; 
+            color: #fff;
+            border-color: #00fff0;
+        }
+
+        .game-select button.active {
+            background: linear-gradient(135deg, #ff007f, #7928ca);
+            color: #fff;
+            border-color: #ff79c6;
+            box-shadow: 0 0 12px rgba(255, 0, 127, 0.6);
+        }
+
+        .game-screen {
+            background: #020205;
+            border-radius: 14px;
+            padding: 16px;
+            border: 2px solid #1f293d;
+            min-height: 350px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 25px rgba(0,0,0,0.9);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-screen::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+            background-size: 100% 4px;
+            z-index: 10;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        #main-menu {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            gap: 12px;
+            z-index: 5;
+        }
+
+        .menu-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 12px;
+            color: #ff79c6;
+            text-shadow: 0 0 10px rgba(255, 121, 198, 0.8);
+        }
+
+        .profile-box {
+            background: #111629;
+            border: 2px solid #00fff0;
+            padding: 8px;
+            border-radius: 10px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .profile-box input {
+            background: #050508;
+            border: 1px solid #222b45;
+            color: #00fff0;
+            padding: 6px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+            text-align: center;
+            border-radius: 6px;
+            outline: none;
+        }
+
+        .profile-box button {
+            background: #50fa7b;
+            color: #000;
+            border: none;
+            padding: 5px;
+            font-weight: bold;
+            font-size: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .leaderboard {
+            background: #080a14;
+            border: 1px solid #1f293d;
+            border-radius: 8px;
+            width: 100%;
+            padding: 6px;
+            text-align: left;
+            font-size: 10px;
+        }
+
+        .leaderboard h3 {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 8px;
+            color: #00fff0;
+            margin-bottom: 4px;
+            text-align: center;
+        }
+
+        .lb-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 2px 4px;
+            border-bottom: 1px solid #111629;
+            color: #a0aec0;
+        }
+
+        .lb-item span:last-child {
+            color: #ff79c6;
+            font-weight: bold;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #00fff0, #0077b6);
+            color: #020205;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 255, 240, 0.7);
+        }
+
+        .game-area { width: 100%; display: flex; flex-direction: column; align-items: center; z-index: 5; }
+
+        #game-box {
+            width: 100%;
+            height: 160px;
+            background: linear-gradient(135deg, #111629, #1f293d);
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            font-size: 14px;
+            font-weight: 700;
+            border: 2px dashed #00fff0;
+            margin-bottom: 10px;
+        }
+
+        canvas {
+            background-color: #000;
+            border: 2px solid #00fff0;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: block;
+            box-shadow: 0 0 20px rgba(0, 255, 240, 0.3);
+        }
+
+        .memory-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+
+        .card {
+            height: 50px;
+            background-color: #111629;
+            border: 2px solid #222b45;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .card.flipped { background-color: #ff007f; border-color: #ff79c6; }
+        .card.matched { background-color: #50fa7b; border-color: #50fa7b; color: #000; }
+
+        .info-text { font-size: 11px; color: #a0aec0; margin-bottom: 8px; }
+
+        .action-btn {
+            background: linear-gradient(135deg, #ff007f, #d90429);
+            color: white;
+            border: none;
+            padding: 9px 18px;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 0, 127, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="arcade-cabinet">
+        <header class="arcade-header">
+            <h1>⚡ CYBER ARCADE ⚡</h1>
+            <div class="stats-bar">
+                <span>OYUNCU: <strong id="player-name-display">Misafir</strong></span>
+                <span>SKOR: <strong id="score">0</strong></span>
+                <span>COIN: <strong id="coins">10</strong></span>
+            </div>
+        </header>
+
+        <!-- 7 Oyunluk Menü -->
+        <nav class="game-select">
+            <button onclick="switchGame('menu')" class="active" data-game="menu">🏠 Menü</button>
+            <button onclick="switchGame('reflex')" data-game="reflex">⚡ Refleks</button>
+            <button onclick="switchGame('snake')" data-game="snake">🐍 Yılan</button>
+            <button onclick="switchGame('memory')" data-game="memory">🧠 Hafıza</button>
+            <button onclick="switchGame('flappy')" data-game="flappy">🐦 Flappy</button>
+            <button onclick="switchGame('tetris')" data-game="tetris">🧱 Tetris</button>
+            <button onclick="switchGame('pong')" data-game="pong">🏓 Pong</button>
+            <button onclick="switchGame('brick')" data-game="brick">🧱 Tuğla</button>
+        </nav>
+
+        <main class="game-screen">
+            <!-- Ana Menü -->
+            <div id="main-menu">
+                <div class="menu-title">OYUNCU KARTI</div>
+                <div class="profile-box">
+                    <input type="text" id="username-input" placeholder="İsmini Gir" maxlength="12">
+                    <button onclick="saveProfile()">Profili Kaydet</button>
+                </div>
+
+                <div class="leaderboard">
+                    <h3>🏆 Skorerler Listesi</h3>
+                    <div id="leaderboard-list"></div>
+                </div>
+
+                <button class="start-btn" onclick="switchGame('reflex')">▶ OYUNA BAŞLA</button>
+            </div>
+
+            <!-- 1. Refleks -->
+            <div id="reflex-game" class="game-area" style="display: none;">
+                <div id="game-box">
+                    <p id="target-text">Başlamak için tıkla!</p>
+                </div>
+                <button class="action-btn" onclick="startReflexGame()">Refleks Başlat</button>
+            </div>
+
+            <!-- 2. Yılan -->
+            <div id="snake-game" class="game-area" style="display: none;">
+                <canvas id="snakeCanvas" width="300" height="260"></canvas>
+                <p class="info-text">Yön Tuşları veya W-A-S-D</p>
+                <button class="action-btn" onclick="startSnakeGame()">Yılanı Başlat</button>
+            </div>
+
+            <!-- 3. Hafıza -->
+            <div id="memory-game" class="game-area" style="display: none;">
+                <div id="memory-grid" class="memory-grid"></div>
+                <p class="info-text">Eşleri Bul, Puanları Topla!</p>
+                <button class="action-btn" onclick="startMemoryGame()">Yeniden Karıştır</button>
+            </div>
+
+            <!-- 4. Flappy -->
+            <div id="flappy-game" class="game-area" style="display: none;">
+                <canvas id="flappyCanvas" width="300" height="260"></canvas>
+                <p class="info-text">Zıplamak için TIKLA veya BOŞLUK</p>
+                <button class="action-btn" onclick="startFlappyGame()">Flappy Başlat</button>
+            </div>
+
+            <!-- 5. Tetris -->
+            <div id="tetris-game" class="game-area" style="display: none;">
+                <canvas id="tetrisCanvas" width="220" height="290"></canvas>
+                <p class="info-text">Ok Tuşları ile Kontrol Et</p>
+                <button class="action-btn" onclick="startTetrisGame()">Tetris Başlat</button>
+            </div>
+
+            <!-- 6. Pong -->
+            <div id="pong-game" class="game-area" style="display: none;">
+                <canvas id="pongCanvas" width="300" height="260"></canvas>
+                <p class="info-text">Fare veya W/S ile Raketi Yönet</p>
+                <button class="action-btn" onclick="startPongGame()">Pong Başlat</button>
+            </div>
+
+            <!-- 7. Yeni Oyun: Brick Breaker (Tuğla Kırma) -->
+            <div id="brick-game" class="game-area" style="display: none;">
+                <canvas id="brickCanvas" width="300" height="260"></canvas>
+                <p class="info-text">Fare veya A/D Tuşları ile Raketi Hareket Ettir</p>
+                <button class="action-btn" onclick="startBrickGame()">Tuğla Kırmayı Başlat</button>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let score = 0;
+        let currentUser = localStorage.getItem('arcade_username') || "Misafir";
+        let coins = parseInt(localStorage.getItem('arcade_coins')) || 10;
+
+        document.getElementById('player-name-display').innerText = currentUser;
+        document.getElementById('coins').innerText = coins;
+
+        let leaderboardData = JSON.parse(localStorage.getItem('arcade_leaderboard')) || [
+            { name: "CyberKing", score: 1250 },
+            { name: "NeonGirl", score: 980 },
+            { name: "GlitchMaster", score: 750 }
+        ];
+
+        function renderLeaderboard() {
+            const listEl = document.getElementById('leaderboard-list');
+            listEl.innerHTML = '';
+            leaderboardData.sort((a, b) => b.score - a.score);
+            leaderboardData.slice(0, 5).forEach((item, index) => {
+                listEl.innerHTML += `<div class="lb-item"><span>${index + 1}. ${item.name}</span><span>${item.score}</span></div>`;
+            });
+        }
+        renderLeaderboard();
+
+        function saveProfile() {
+            const inputVal = document.getElementById('username-input').value.trim();
+            if (inputVal) {
+                currentUser = inputVal;
+                localStorage.setItem('arcade_username', currentUser);
+                document.getElementById('player-name-display').innerText = currentUser;
+                alert("Profil Kaydedildi: " + currentUser);
+            }
+        }
+
+        function updateScore(points) {
+            score += points;
+            document.getElementById('score').innerText = score;
+            let userEntry = leaderboardData.find(i => i.name === currentUser);
+            if (userEntry) {
+                if (score > userEntry.score) userEntry.score = score;
+            } else {
+                leaderboardData.push({ name: currentUser, score: score });
+            }
+            localStorage.setItem('arcade_leaderboard', JSON.stringify(leaderboardData));
+            renderLeaderboard();
+        }
+
+        function addCoin(amount) {
+            coins += amount;
+            document.getElementById('coins').innerText = coins;
+            localStorage.setItem('arcade_coins', coins);
+        }
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            let now = audioCtx.currentTime;
+            if (type === 'click') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(400, now); osc.frequency.exponentialRampToValueAtTime(800, now + 0.08);
+                gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.08);
+                osc.start(now); osc.stop(now + 0.08);
+            } else if (type === 'score') {
+                osc.type = 'triangle'; osc.frequency.setValueAtTime(587.33, now); osc.frequency.setValueAtTime(880, now + 0.1);
+                gain.gain.setValueAtTime(0.15, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+                osc.start(now); osc.stop(now + 0.2);
+            } else if (type === 'gameover') {
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(200, now); osc.frequency.linearRampToValueAtTime(60, now + 0.4);
+                gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.4);
+                osc.start(now); osc.stop(now + 0.4);
+            }
+        }
+
+        let snakeInterval, flappyInterval, tetrisInterval, pongInterval, brickInterval;
+
+        function switchGame(gameType) {
+            playSound('click');
+            clearInterval(snakeInterval);
+            clearInterval(flappyInterval);
+            clearInterval(tetrisInterval);
+            clearInterval(pongInterval);
+            clearInterval(brickInterval);
+
+            document.getElementById('main-menu').style.display = (gameType === 'menu') ? 'flex' : 'none';
+
+            ['reflex', 'snake', 'memory', 'flappy', 'tetris', 'pong', 'brick'].forEach(area => {
+                document.getElementById(area + '-game').style.display = (area === gameType) ? 'flex' : 'none';
+            });
+
+            document.querySelectorAll('.game-select button').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.game === gameType);
+            });
+
+            if (gameType === 'memory') startMemoryGame();
+        }
+
+        // Refleks
+        let refStart, refTimeout, refActive = false, refWait = false;
+        const gBox = document.getElementById('game-box');
+        const tText = document.getElementById('target-text');
+
+        function startReflexGame() {
+            playSound('click');
+            tText.innerText = "Kutu YEŞİL olunca tıkla!";
+            gBox.style.backgroundColor = "#ff007f";
+            refActive = false; refWait = true;
+            clearTimeout(refTimeout);
+            refTimeout = setTimeout(() => {
+                if (refWait) {
+                    gBox.style.backgroundColor = "#50fa7b";
+                    tText.innerText = "ŞİMDİ TIKLA!";
+                    refStart = Date.now();
+                    refActive = true; refWait = false;
+                }
+            }, Math.floor(Math.random() * 2500) + 1500);
+        }
+
+        gBox.onclick = function() {
+            if (refActive) {
+                let time = Date.now() - refStart;
+                tText.innerText = `Süper! ${time} ms`;
+                updateScore(Math.max(1000 - time, 50));
+                addCoin(1);
+                playSound('score');
+                refActive = false;
+            } else if (refWait) {
+                clearTimeout(refTimeout);
+                refWait = false;
+                tText.innerText = "Çok erkendi!";
+                playSound('gameover');
+            }
+        };
+
+        // Yılan
+        const sCanvas = document.getElementById('snakeCanvas');
+        const sCtx = sCanvas.getContext('2d');
+        const gSize = 15;
+        let snake = [], sDx = gSize, sDy = 0, sFood = {x: 0, y: 0};
+
+        function startSnakeGame() {
+            playSound('click');
+            snake = [{x: 150, y: 135}, {x: 135, y: 135}, {x: 120, y: 135}];
+            sDx = gSize; sDy = 0;
+            spawnSnakeFood();
+            clearInterval(snakeInterval);
+            snakeInterval = setInterval(updateSnake, 110);
+        }
+
+        function updateSnake() {
+            let head = {x: snake[0].x + sDx, y: snake[0].y + sDy};
+            if (head.x < 0) head.x = sCanvas.width - gSize;
+            if (head.x >= sCanvas.width) head.x = 0;
+            if (head.y < 0) head.y = sCanvas.height - gSize;
+            if (head.y >= sCanvas.height) head.y = 0;
+
+            for (let i = 1; i < snake.length; i++) {
+                if (snake[i].x === head.x && snake[i].y === head.y) {
+                    clearInterval(snakeInterval);
+                    playSound('gameover');
+                    alert("Oyun Bitti! Skor: " + score);
+                    return;
+                }
+            }
+
+            snake.unshift(head);
+            if (head.x === sFood.x && head.y === sFood.y) {
+                updateScore(50); addCoin(2); playSound('score'); spawnSnakeFood();
+            } else { snake.pop(); }
+
+            sCtx.fillStyle = '#020205';
+            sCtx.fillRect(0, 0, sCanvas.width, sCanvas.height);
+            sCtx.fillStyle = '#ff79c6';
+            sCtx.fillRect(sFood.x + 1, sFood.y + 1, gSize - 2, gSize - 2);
+            snake.forEach((seg, i) => {
+                sCtx.fillStyle = i === 0 ? '#00fff0' : '#00b4d8';
+                sCtx.fillRect(seg.x + 1, seg.y + 1, gSize - 2, gSize - 2);
+            });
+        }
+
+        function spawnSnakeFood() {
+            sFood.x = Math.floor(Math.random() * (sCanvas.width / gSize)) * gSize;
+            sFood.y = Math.floor(Math.random() * (sCanvas.height / gSize)) * gSize;
+        }
+
+        // Hafıza
+        const emojis = ['🚀', '👾', '🕹️', '👑', '🔥', '💎', '🎯', '⚡'];
+        let flipped = [], pairsFound = 0;
+
+        function startMemoryGame() {
+            playSound('click');
+            let gridEl = document.getElementById('memory-grid');
+            gridEl.innerHTML = '';
+            flipped = []; pairsFound = 0;
+            let deck = [...emojis, ...emojis].sort(() => 0.5 - Math.random());
+            deck.forEach(emoji => {
+                let card = document.createElement('div');
+                card.className = 'card';
+                card.dataset.emoji = emoji;
+                card.innerText = '❓';
+                card.onclick = function() {
+                    if (flipped.length < 2 && !this.classList.contains('flipped') && !this.classList.contains('matched')) {
+                        playSound('click');
+                        this.classList.add('flipped');
+                        this.innerText = this.dataset.emoji;
+                        flipped.push(this);
+                        if (flipped.length === 2) {
+                            let [c1, c2] = flipped;
+                            if (c1.dataset.emoji === c2.dataset.emoji) {
+                                c1.classList.add('matched'); c2.classList.add('matched');
+                                flipped = []; pairsFound++; updateScore(100); playSound('score');
+                                if (pairsFound === emojis.length) setTimeout(() => alert('Tebrikler!'), 200);
+                            } else {
+                                setTimeout(() => {
+                                    c1.classList.remove('flipped'); c2.classList.remove('flipped');
+                                    c1.innerText = '❓'; c2.innerText = '❓'; flipped = [];
+                                }, 700);
+                            }
+                        }
+                    }
+                };
+                gridEl.appendChild(card);
+            });
+        }
+
+        // Flappy
+        const fCanvas = document.getElementById('flappyCanvas');
+        const fCtx = fCanvas.getContext('2d');
+        let  = 120, fVel = 0, fGrav = 0.35, pipes = [], fActive = false;
+
+        function startFlappyGame() {
+            playSound('click');
+            bY = 120; fVel = 0; pipes = []; fActive = true;
+            clearInterval(flappyInterval);
+            flappyInterval = setInterval(() => {
+                if (!fActive) return;
+                fVel += fGrav; bY += fVel;
+                if (bY > fCanvas.height - 12 || bY < 0) endFlappy();
+                if (pipes.length === 0 || pipes[pipes.length - 1].x < fCanvas.width - 110) {
+                    let gap = 95, topH = Math.floor(Math.random() * (fCanvas.height - gap - 40)) + 20;
+                    pipes.push({ x: fCanvas.width, top: topH, bottom: fCanvas.height - topH - gap, passed: false });
+                }
+                pipes.forEach((p, idx) => {
+                    p.x -= 2;
+                    if (40 + 12 > p.x && 40 < p.x + 28 && (bY < p.top || bY + 12 > fCanvas.height - p.bottom)) endFlappy();
+                    if (p.x + 28 < 40 && !p.passed) { p.passed = true; updateScore(20); addCoin(1); playSound('score'); }
+                    if (p.x < -30) pipes.splice(idx, 1);
+                });
+                fCtx.fillStyle = '#020205'; fCtx.fillRect(0, 0, fCanvas.width, fCanvas.height);
+                fCtx.fillStyle = '#f1c40f'; fCtx.beginPath(); fCtx.arc(40, bY, 10, 0, Math.PI * 2); fCtx.fill();
+                fCtx.fillStyle = '#50fa7b';
+                pipes.forEach(p => {
+                    fCtx.fillRect(p.x, 0, 28, p.top);
+                    fCtx.fillRect(p.x, fCanvas.height - p.bottom, 28, p.bottom);
+                });
+            }, 20);
+        }
+
+        function flap() { if (fActive) { fVel = -5.5; playSound('click'); } }
+        function endFlappy() { fActive = false; clearInterval(flappyInterval); playSound('gameover'); alert("Oyun Bitti!"); }
+        fCanvas.onclick = flap;
+
+        // Tetris
+        const tCanvas = document.getElementById('tetrisCanvas');
+        const tCtx = tCanvas.getContext('2d');
+        const tB = 20, tC = 11, tR = 14;
+        let tBoard = Array.from({length: tR}, () => Array(tC).fill(0)), curT = null;
+        const shapes = [
+            { shape: [[1,1,1,1]], color: '#00fff0' },
+            { shape: [[1,1],[1,1]], color: '#f1c40f' },
+            { shape: [[0,1,0],[1,1,1]], color: '#bd93f9' },
+            { shape: [[1,0,0],[1,1,1]], color: '#ffb86c' },
+            { shape: [[0,0,1],[1,1,1]], color: '#8be9fd' },
+            { shape: [[0,1,1],[1,1,0]], color: '#50fa7b' },
+            { shape: [[1,1,0],[0,1,1]], color: '#ff5555' }
+        ];
+
+        function startTetrisGame() {
+            playSound('click');
+            tBoard = Array.from({length: tR}, () => Array(tC).fill(0));
+            spawnTetris();
+            clearInterval(tetrisInterval);
+            tetrisInterval = setInterval(() => {
+                curT.y++;
+                if (checkColl()) {
+                    curT.y--;
+                    mergeT();
+                    clearR();
+                    spawnTetris();
+                }
+                drawT();
+            }, 450);
+        }
+
+        function spawnTetris() {
+            let rand = shapes[Math.floor(Math.random() * shapes.length)];
+            curT = { shape: rand.shape, color: rand.color, x: Math.floor(tC/2) - 1, y: 0 };
+            if (checkColl()) { clearInterval(tetrisInterval); playSound('gameover'); alert("Tetris Bitti!"); }
+        }
+
+        function checkColl() {
+            for (let r = 0; r < curT.shape.length; r++) {
+                for (let c = 0; c < curT.shape[r].length; c++) {
+                    if (curT.shape[r][c]) {
+                        let nx = curT.x + c, ny = curT.y + r;
+                        if (nx < 0 || nx >= tC || ny >= tR || (ny >= 0 && tBoard[ny][nx])) return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        function mergeT() {
+            for (let r = 0; r < curT.shape.length; r++) {
+                for (let c = 0; c < curT.shape[r].length; c++) {
+                    if (curT.shape[r][c]) tBoard[curT.y + r][curT.x + c] = curT.color;
+                }
+            }
+        }
+
+        function clearR() {
+            let cl = 0;
+            for (let r = tR - 1; r >= 0; r--) {
+                if (tBoard[r].every(cell => cell !== 0)) {
+                    tBoard.splice(r, 1); tBoard.unshift(Array(tC).fill(0)); cl++; r++;
+                }
+            }
+            if (cl > 0) { updateScore(cl * 100); addCoin(cl * 2); playSound('score'); }
+        }
+
+        function drawT() {
+            tCtx.fillStyle = '#020205'; tCtx.fillRect(0, 0, tCanvas.width, tCanvas.height);
+            tCtx.strokeStyle = '#111827';
+            tCtx.lineWidth = 1;
+            for (let i = 0; i <= tC; i++) {
+                tCtx.beginPath(); tCtx.moveTo(i * tB, 0); tCtx.lineTo(i * tB, tCanvas.height); tCtx.stroke();
+            }
+            for (let j = 0; j <= tR; j++) {
+                tCtx.beginPath(); tCtx.moveTo(0, j * tB); tCtx.lineTo(tCanvas.width, j * tB); tCtx.stroke();
+            }
+            for (let r = 0; r < tR; r++) {
+                for (let c = 0; c < tC; c++) {
+                    if (tBoard[r][c]) { tCtx.fillStyle = tBoard[r][c]; tCtx.fillRect(c * tB + 1, r * tB + 1, tB - 2, tB - 2); }
+                }
+            }
+            if (curT) {
+                tCtx.fillStyle = curT.color;
+                for (let r = 0; r < curT.shape.length; r++) {
+                    for (let c = 0; c < curT.shape[r].length; c++) {
+                        if (curT.shape[r][c]) tCtx.fillRect((curT.x + c) * tB + 1, (curT.y + r) * tB + 1, tB - 2, tB - 2);
+                    }
+                }
+            }
+        }
+
+        // Pong
+        const pCanvas = document.getElementById('pongCanvas');
+        const pCtx = pCanvas.getContext('2d');
+        let pX = 150, pY = 230, pWidth = 60, pHeight = 10;
+        let ballX = 150, ballY = 100, ballDX = 2.5, ballDY = -2.5, pActive = false;
+
+        function startPongGame() {
+            playSound('click');
+            ballX = 150; ballY = 100; ballDX = 2.5; ballDY = -2.5;
+            pActive = true;
+            clearInterval(pongInterval);
+            pongInterval = setInterval(updatePong, 20);
+        }
+
+        function updatePong() {
+            if (!pActive) return;
+            ballX += ballDX; ballY += ballDY;
+            if (ballX < 0 || ballX > pCanvas.width) ballDX *= -1;
+            if (ballY < 0) ballDY *= -1;
+            if (ballY + 8 >= pY && ballX >= pX && ballX <= pX + pWidth) {
+                ballDY *= -1; updateScore(10); playSound('score');
+            }
+            if (ballY > pCanvas.height) {
+                pActive = false; clearInterval(pongInterval); playSound('gameover'); alert("Top Düştü!");
+            }
+            pCtx.fillStyle = '#020205'; pCtx.fillRect(0, 0, pCanvas.width, pCanvas.height);
+            pCtx.fillStyle = '#00fff0'; pCtx.fillRect(pX, pY, pWidth, pHeight);
+            pCtx.fillStyle = '#ff007f'; pCtx.beginPath(); pCtx.arc(ballX, ballY, 6, 0, Math.PI * 2); pCtx.fill();
+        }
+
+        pCanvas.addEventListener('mousemove', (e) => {
+            let rect = pCanvas.getBoundingClientRect();
+            pX = (e.clientX - rect.left) - pWidth / 2;
+            if (pX < 0) pX = 0;
+            if (pX > pCanvas.width - pWidth) pX = pCanvas.width - pWidth;
+        });
+
+        // --- 7. YENİ OYUN: BRICK BREAKER (TUĞLA KIRMA) ---
+        const bCanvas = document.getElementById('brickCanvas');
+        const bCtx = bCanvas.getContext('2d');
+        let bPaddleX = 120, bPaddleW = 70, bPaddleH = 10;
+        let bX = 150, bY = 180, bDX = 2, bDY = -2, bActive = false;
+        let bricks = [];
+        const bRowCount = 3, bColCount = 5, bWidth = 50, bHeight = 16, bPadding = 8, bOffsetTop = 20, bOffsetLeft = 15;
+
+        function initBricks() {
+            bricks = [];
+            for (let c = 0; c < bColCount; c++) {
+                bricks[c] = [];
+                for (let r = 0; r < bRowCount; r++) {
+                    bricks[c][r] = { x: 0, y: 0, status: 1 };
+                }
+            }
+        }
+
+        function startBrickGame() {
+            playSound('click');
+            bX = 150; bY = 180; bDX = 2; bDY = -2;
+            initBricks();
+            bActive = true;
+            clearInterval(brickInterval);
+            brickInterval = setInterval(updateBrick, 20);
+        }
+
+        function updateBrick() {
+            if (!bActive) return;
+
+            bX += bDX;
+            bY += bDY;
+
+            if (bX < 0 || bX > bCanvas.width) bDX *= -1;
+            if (bY < 0) bDY *= -1;
+
+            // Raket Çarpışması
+            if (bY + 6 >= bCanvas.height - 15 && bX >= bPaddleX && bX <= bPaddleX + bPaddleW) {
+                bDY *= -1;
+                playSound('click');
+            }
+
+            // Tuğla Çarpışmaları
+            for (let c = 0; c < bColCount; c++) {
+                for (let r = 0; r < bRowCount; r++) {
+                    let b = bricks[c][r];
+                    if (b.status === 1) {
+                        let brickX = c * (bWidth + bPadding) + bOffsetLeft;
+                        let brickY = r * (bHeight + bPadding) + bOffsetTop;
+                        b.x = brickX;
+                        b.y = brickY;
+                        if (bX > brickX && bX < brickX + bWidth && bY > brickY && bY < brickY + bHeight) {
+                            bDY *= -1;
+                            b.status = 0;
+                            updateScore(25);
+                            addCoin(1);
+                            playSound('score');
+                        }
+                    }
+                }
+            }
+
+            if (bY > bCanvas.height) {
+                bActive = false;
+                clearInterval(brickInterval);
+                playSound('gameover');
+                alert("Top Düştü! Tuğla Kırma Bitti!");
+            }
+
+            // Çizim
+            bCtx.fillStyle = '#020205';
+            bCtx.fillRect(0, 0, bCanvas.width, bCanvas.height);
+
+            // Tuğlaları Çiz
+            for (let c = 0; c < bColCount; c++) {
+                for (let r = 0; r < bRowCount; r++) {
+                    if (bricks[c][r].status === 1) {
+                        let brickX = c * (bWidth + bPadding) + bOffsetLeft;
+                        let brickY = r * (bHeight + bPadding) + bOffsetTop;
+                        bCtx.fillStyle = r === 0 ? '#ff007f' : r === 1 ? '#00fff0' : '#50fa7b';
+                        bCtx.fillRect(brickX, brickY, bWidth, bHeight);
+                    }
+                }
+            }
+
+            // Raket Çiz
+            bCtx.fillStyle = '#00fff0';
+            bCtx.fillRect(bPaddleX, bCanvas.height - 15, bPaddleW, bPaddleH);
+
+            // Top Çiz
+            bCtx.fillStyle = '#ffb86c';
+            bCtx.beginPath();
+            bCtx.arc(bX, bY, 6, 0, Math.PI * 2);
+            bCtx.fill();
+        }
+
+        bCanvas.addEventListener('mousemove', (e) => {
+            let rect = bCanvas.getBoundingClientRect();
+            bPaddleX = (e.clientX - rect.left) - bPaddleW / 2;
+            if (bPaddleX < 0) bPaddleX = 0;
+            if (bPaddleX > bCanvas.width - bPaddleW) bPaddleX = bCanvas.width - bPaddleW;
+        });
+
+        // Genel Klavye Kontrolleri
+        document.addEventListener('keydown', (e) => {
+            if ((e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') && sDy === 0) { sDx = 0; sDy = -gSize; }
+            else if ((e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') && sDy === 0) { sDx = 0; sDy = gSize; }
+            else if ((e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') && sDx === 0) { sDx = -gSize; sDy = 0; }
+            else if ((e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') && sDx === 0) { sDx = gridSize; sDy = 0; }
+
+            if (e.code === 'Space') { e.preventDefault(); flap(); }
+
+            // Pong & Tuğla Kırma Tuş Kontrolleri (A ve D)
+            if (document.getElementById('pong-game').style.display === 'flex') {
+                if (e.key === 'ArrowLeft' || e.key === 'a') { pX -= 20; if (pX < 0) pX = 0; }
+                if (e.key === 'ArrowRight' || e.key === 'd') { pX += 20; if (pX > pCanvas.width - pWidth) pX = pCanvas.width - pWidth; }
+            }
+            if (document.getElementById('brick-game').style.display === 'flex') {
+                if (e.key === 'ArrowLeft' || e.key === 'a') { bPaddleX -= 20; if (bPaddleX < 0) bPaddleX = 0; }
+                if (e.key === 'ArrowRight' || e.key === 'd') { bPaddleX += 20; if (bPaddleX > bCanvas.width - bPaddleW) bPaddleX = bCanvas.width - bPaddleW; }
+            }
+
+            if (document.getElementById('tetris-game').style.display === 'flex' && curT) {
+                if (e.key === 'ArrowLeft') { curT.x--; if (checkColl()) curT.x++; }
+                else if (e.key === 'ArrowRight') { curT.x++; if (checkColl()) curT.x--; }
+                else if (e.key === 'ArrowDown') { curT.y++; if (checkColl()) curT.y--; }
+                else if (e.key === 'ArrowUp') {
+                    let rot = curT.shape[0].map((_, i) => curT.shape.map(row => row[i]).reverse());
+                    let old = curT.shape; curT.shape = rot;
+                    if (checkColl()) curT.shape = old;
+                }
+                drawT();
+            }
+        });
+    </script>
+</body>
+</html>
